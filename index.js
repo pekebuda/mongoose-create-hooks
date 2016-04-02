@@ -5,9 +5,9 @@ var async       = require('async')
 
 function plugin(schema) {
     /****************************************************************
-     * Pre-Hooks
+     * PRE HOOKS
      * These hooks run before an instance has been updated
-     * Puesto que el `iteree` consiste meramente en la ejecucion del 
+     * Puesto que el `iteratee` consiste meramente en la ejecucion del 
      * metodo pertinente en cada una de las iteraciones, los hooks 
      * agregados a la coleccion de `pre-create` deben adecuarse a la 
      * signatura `function(doc, cb)`
@@ -19,19 +19,16 @@ function plugin(schema) {
         async.eachSeries(
             methods,
             function(method, signal){ method(doc, signal) }, 
-            function(err){
-                if (err){ throw err; }
-                callback();
-            }
+            callback
         );
     };
     
     
     
     /****************************************************************
-     * Post-Hooks
+     * POST HOOKS
      * These hooks run after an instance has been updated
-     * Puesto que el `iteree` consiste meramente en la ejecucion del 
+     * Puesto que el `iteratee` consiste meramente en la ejecucion del 
      * metodo pertinente en cada una de las iteraciones, los hooks 
      * agregados a la coleccion de `pre-create` deben adecuarse a la 
      * signatura `function(doc, cb)`
@@ -52,13 +49,13 @@ function plugin(schema) {
     
     /****************************************************************
      * SETUP
-     * En el seno de las funciones definidas, `self` se refiere al 
-     * documento mismo sobre el cual se opera las `hooks`. 
+     * En el seno de las funciones definidas, `DOC` se refiere al 
+     * documento mismo sobre el cual operan las `hooks`. 
      */
     schema.pre('validate', function(next){
             const DOC = this;
             DOC._wasNew = DOC.isNew;
-            if (DOC.isNew) DOC.runPreCreateMethods(schema.preCreateMethods, DOC, ()=>next());
+            if (DOC.isNew) DOC.runPreCreateMethods(schema.preCreateMethods, DOC, next);
             return;
         }
     );
