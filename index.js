@@ -35,11 +35,8 @@ function plugin(schema) {
     schema.postCreateMethods = [];
     schema.postCreate = function(fn){ schema.postCreateMethods.push(fn) };
     schema.methods.runPostCreateMethods = function(methods, doc){
-        async.eachSeries(
-            methods,
-            function(method, signal){ method(doc, signal) }, 
-            function(err){
-                if (err){ throw err; }
+        methods.forEach(function(method){ 
+                method(doc, function(){return});
             }
         );
     };
