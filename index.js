@@ -12,7 +12,6 @@ function plugin(schema) {
      * agregados a la coleccion de `pre-create` deben adecuarse a la 
      * signatura `function(doc, cb)`
      */
-    
     schema.preCreateMethods = [];
     schema.preCreate = function(fn){ schema.preCreateMethods.push(fn) };
     schema.methods.runPreCreateMethods = function(methods, doc, callback){
@@ -56,13 +55,13 @@ function plugin(schema) {
             const DOC = this;
             DOC._wasNew = DOC.isNew;
             if (DOC.isNew) DOC.runPreCreateMethods(schema.preCreateMethods, DOC, next);
-            return;
+            else return next();
         }
     );
     schema.post('save', function(){
             const DOC = this;
-            if (DOC._wasNew) DOC.runCreatePostMethods(schema.postCreateMethods, DOC);
-            return;
+            if (DOC._wasNew) DOC.runPostCreateMethods(schema.postCreateMethods, DOC);
+            else return;
         }
     );
 }
