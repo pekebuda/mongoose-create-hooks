@@ -74,8 +74,7 @@ function plugin(schema) {
         }
     );
     schema.post('save', function(doc){
-            const DOC = this;
-            if (DOC._wasNew) DOC.runPostCreateMethods(schema.postCreateMethods, DOC);
+            if (doc._wasNew) doc.runPostCreateMethods(schema.postCreateMethods, doc);
             else return;
         }
     );
