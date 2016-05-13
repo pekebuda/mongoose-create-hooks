@@ -25,13 +25,7 @@ function plugin(schema) {
      */
     schema.preCreateMethods = [];
     schema.preCreate = function(fn){ schema.preCreateMethods.push(fn) };
-    schema.methods.runPreCreateMethods = function(methods, doc, callback){
-        async.eachSeries(
-            methods,
-            function(method, signal){ method(doc, signal) }, 
-            callback
-        );
-    };
+    schema.methods.runPreCreateMethods = runPreCreateMethods;
     
     
     
@@ -45,12 +39,7 @@ function plugin(schema) {
      */
     schema.postCreateMethods = [];
     schema.postCreate = function(fn){ schema.postCreateMethods.push(fn) };
-    schema.methods.runPostCreateMethods = function(methods, doc){
-        methods.forEach(function(method){ 
-                method(doc, function(){return});
-            }
-        );
-    };
+    schema.methods.runPostCreateMethods = runPreCreateMethods;
     
     
     
@@ -69,13 +58,32 @@ function plugin(schema) {
     schema.pre('validate', function(next){
             const DOC = this;
             DOC._wasNew = DOC.isNew;
-            if (DOC.isNew) DOC.runPreCreateMethods(schema.preCreateMethods, DOC, next);
+            if (DOC.isNew) runPreCreateMethods(schema.preCreateMethods, DOC, next);
             else return next();
         }
     );
     schema.post('save', function(doc){
-            if (doc._wasNew) doc.runPostCreateMethods(schema.postCreateMethods, doc);
+            if (doc._wasNew) runPostCreateMethods(schema.postCreateMethods, doc);
             else return;
+        }
+    );
+}
+
+
+
+function runPreCreateMethods(methods, doc, callback){
+    async.eachSeries(
+        methods,
+        function(method, signal){ method.bind(doc)(signal) }, 
+        callback
+    );
+}
+
+
+
+function runPostCreateMethods(methods, doc){
+    methods.forEach(function(method){ 
+            method(doc, function(){return});
         }
     );
 }
